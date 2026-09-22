@@ -1,47 +1,23 @@
 package ru.mirea.ispteam;
 
-import ru.mirea.ispteam.repository.ConnectionRequestRepository;
-import ru.mirea.ispteam.repository.ConnectionRequestRepositoryImpl;
-import ru.mirea.ispteam.repository.SubscriberRepository;
-import ru.mirea.ispteam.repository.SubscriberRepositoryImpl;
-import ru.mirea.ispteam.service.ConnectionRequestQueryService;
-import ru.mirea.ispteam.service.ConnectionRequestService;
-import ru.mirea.ispteam.service.StatisticsService;
-import ru.mirea.ispteam.service.SubscriberService;
-import ru.mirea.ispteam.ui.ConsoleApp;
-import ru.mirea.ispteam.util.DatabaseManager;
-
 /*
- * Владелец: C (точка входа). Скелет-«сборка» создан A.
+ * Владелец: C (точка входа).
  *
- * Composition root: здесь собирается граф зависимостей всех слоёв
- *   util (A) -> repository (A) -> service (B, D) -> ui (C).
- * Каждый слой получает зависимости через конструктор.
+ * TODO(C): реализовать composition root — собрать граф зависимостей и запустить ConsoleApp.
+ *
+ * Порядок сборки слоёв (каждый слой получает зависимости через конструктор):
+ *   1) util:       DatabaseManager db = new DatabaseManager(); db.initializeIfEnabled();
+ *   2) repository:  SubscriberRepositoryImpl(db), ConnectionRequestRepositoryImpl(db)   [готово, A]
+ *   3) service:     SubscriberService(...), ConnectionRequestService(...)               [B]
+ *                   ConnectionRequestQueryService(...), StatisticsService(...)          [D]
+ *   4) ui:          new ConsoleApp(subscriberService, requestService,
+ *                                  queryService, statisticsService).run();
+ *
+ * Конструкторы всех классов уже объявлены — осталось связать их здесь.
  */
 public class Main {
 
     public static void main(String[] args) {
-        // --- Слой инфраструктуры и данных (A) ---
-        DatabaseManager db = new DatabaseManager();
-        db.initializeIfEnabled(); // применит schema.sql и (при пустой БД) seed-data.sql
-
-        SubscriberRepository subscriberRepository = new SubscriberRepositoryImpl(db);
-        ConnectionRequestRepository requestRepository = new ConnectionRequestRepositoryImpl(db);
-
-        // --- Слой бизнес-логики (B) ---
-        SubscriberService subscriberService =
-                new SubscriberService(subscriberRepository, requestRepository);
-        ConnectionRequestService requestService =
-                new ConnectionRequestService(requestRepository, subscriberRepository);
-
-        // --- Слой запросов/статистики (D) ---
-        ConnectionRequestQueryService queryService =
-                new ConnectionRequestQueryService(requestService);
-        StatisticsService statisticsService =
-                new StatisticsService(subscriberService, requestService);
-
-        // --- Слой UI (C) ---
-        ConsoleApp app = new ConsoleApp(subscriberService, requestService, queryService, statisticsService);
-        app.run();
+        System.out.println("TODO(C): точка входа не реализована — см. Main.java");
     }
 }

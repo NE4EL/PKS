@@ -1,11 +1,13 @@
 package ru.mirea.ispteam.model;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 /*
- * Владелец: D (модель). Скелет создан A (рабочий класс — нужен репозиториям).
+ * Владелец: D (модель). Скелет создан A: только поля/конструкторы/геттеры-сеттеры —
+ * необходимый минимум, чтобы компилировался слой репозиториев (A).
  * Поля/типы — эталон из PKS.md разд. 2.2. Менять состав полей только по согласованию.
+ *
+ * TODO(D): добавить equals/hashCode (по id) и toString — это твоя часть (сдаётся на защите).
  */
 public class ConnectionRequest {
 
@@ -112,30 +114,5 @@ public class ConnectionRequest {
         this.updatedAt = updatedAt;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ConnectionRequest that = (ConnectionRequest) o;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
-
-    @Override
-    public String toString() {
-        return "ConnectionRequest{" +
-                "id=" + id +
-                ", subscriberId=" + subscriberId +
-                ", type=" + type +
-                ", status=" + status +
-                ", tariffPlan='" + tariffPlan + '\'' +
-                ", description='" + description + '\'' +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                '}';
-    }
+    // TODO(D): equals/hashCode по id + toString.
 }
