@@ -1,0 +1,33 @@
+# Maven
+target/
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.project
+.classpath
+nbproject/
+build/
+out/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Логи / временные
+*.log
+*.tmp
+
+# Локальные настройки подключения к БД (у каждого свои)
+# Оставляем db.properties.example в репозитории, а реальный — игнорируем при необходимости.
+# src/main/resources/db.properties
+
+# Экспортированные отчёты
+*.xlsx
+!docs/**/*.xlsx
