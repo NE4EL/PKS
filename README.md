@@ -36,11 +36,15 @@ createdb isp
 ```
 
 ### 2. Настроить подключение
-Отредактируйте `src/main/resources/db.properties` под свою локальную БД:
+Скопируйте шаблон и впишите **свои** локальные значения (реальный `db.properties`
+в git не коммитится — у каждого участника он свой):
+```bash
+cp src/main/resources/db.properties.example src/main/resources/db.properties
+```
 ```properties
 db.url=jdbc:postgresql://localhost:5432/isp
-db.user=postgres
-db.password=postgres
+db.user=postgres      # у Homebrew-установки обычно = имя пользователя ОС
+db.password=postgres  # у Homebrew-установки обычно пустой
 db.initOnStartup=true
 ```
 При `db.initOnStartup=true` приложение само применит `schema.sql` при старте и наполнит БД

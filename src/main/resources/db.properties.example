@@ -1,0 +1,22 @@
+# ШАБЛОН настроек подключения к PostgreSQL.
+# ─────────────────────────────────────────────────────────────
+# Скопируйте этот файл в db.properties (в той же папке) и впишите
+# СВОИ локальные значения. Реальный db.properties в git не коммитится
+# (см. .gitignore) — поэтому у каждого участника свои настройки БД,
+# и они не конфликтуют между собой при push.
+#
+#   cp src/main/resources/db.properties.example src/main/resources/db.properties
+# ─────────────────────────────────────────────────────────────
+
+db.url=jdbc:postgresql://localhost:5432/isp
+db.user=postgres
+db.password=postgres
+
+# Подсказка: при установке PostgreSQL через Homebrew (macOS) суперпользователь
+# обычно совпадает с именем системного пользователя, а пароль пустой, например:
+#   db.user=<ваш_логин_в_ОС>
+#   db.password=
+
+# Автоматически применять schema.sql и seed-data.sql при запуске (true/false).
+# seed-data.sql применяется только если таблица subscribers пустая.
+db.initOnStartup=true
