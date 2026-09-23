@@ -2,6 +2,8 @@
 target/
 *.jar
 !.mvn/wrapper/maven-wrapper.jar
+# Служебный файл maven-shade-plugin, генерируется при сборке
+dependency-reduced-pom.xml
 
 # IDE
 .idea/
@@ -24,9 +26,10 @@ Thumbs.db
 *.log
 *.tmp
 
-# Локальные настройки подключения к БД (у каждого свои)
-# Оставляем db.properties.example в репозитории, а реальный — игнорируем при необходимости.
-# src/main/resources/db.properties
+# Локальные настройки подключения к БД — у каждого участника свои.
+# В git коммитим только шаблон db.properties.example, реальный файл игнорируем,
+# чтобы ничей локальный логин/пароль/база не попадали в репозиторий и не конфликтовали.
+src/main/resources/db.properties
 
 # Экспортированные отчёты
 *.xlsx

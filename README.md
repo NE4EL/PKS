@@ -36,11 +36,15 @@ createdb isp
 ```
 
 ### 2. Настроить подключение
-Отредактируйте `src/main/resources/db.properties` под свою локальную БД:
+Скопируйте шаблон и впишите **свои** локальные значения (реальный `db.properties`
+в git не коммитится — у каждого участника он свой):
+```bash
+cp src/main/resources/db.properties.example src/main/resources/db.properties
+```
 ```properties
 db.url=jdbc:postgresql://localhost:5432/isp
-db.user=postgres
-db.password=postgres
+db.user=postgres      # у Homebrew-установки обычно = имя пользователя ОС
+db.password=postgres  # у Homebrew-установки обычно пустой
 db.initOnStartup=true
 ```
 При `db.initOnStartup=true` приложение само применит `schema.sql` при старте и наполнит БД
@@ -68,9 +72,9 @@ mvn compile exec:java
 ## Статус скелета
 - [x] Структура пакетов `ru.mirea.ispteam`, `pom.xml`, `.gitignore`
 - [x] `schema.sql`, `seed-data.sql` (5 абонентов, 12 заявок)
-- [x] Модель + enum'ы (рабочие, дополняет D)
-- [x] Репозитории + `DatabaseManager` (A — реализовано)
-- [x] Исключения
+- [x] Репозитории + `DatabaseManager` + исключения (A — реализовано, B-исключения тоже готовы)
+- [~] `model/` — только поля/геттеры-сеттеры (нужно для компиляции); `equals/hashCode/toString` — **D**
+- [ ] `Main.java` (сборка зависимостей) — **C**
 - [ ] Бизнес-логика сервисов — **B**
 - [ ] Консольный UI — **C**
 - [ ] Поиск/фильтр/статистика/экспорт — **D**
