@@ -2,6 +2,8 @@
 target/
 *.jar
 !.mvn/wrapper/maven-wrapper.jar
+# Служебный файл maven-shade-plugin, генерируется при сборке
+dependency-reduced-pom.xml
 
 # IDE
 .idea/
