@@ -39,7 +39,7 @@ public class Main {
             ConnectionRequestService requestService =
                     new ConnectionRequestService(requestRepository, subscriberRepository);
             ConnectionRequestQueryService queryService =
-                    new ConnectionRequestQueryService(requestService);
+                    new ConnectionRequestQueryService(requestService, subscriberService);
             StatisticsService statisticsService =
                     new StatisticsService(subscriberService, requestService);
 

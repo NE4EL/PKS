@@ -1,13 +1,12 @@
 package ru.mirea.ispteam.model;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 /*
  * Владелец: D (модель). Скелет создан A: только поля/конструкторы/геттеры-сеттеры —
  * необходимый минимум, чтобы компилировался слой репозиториев (A).
  * Поля/типы — эталон из PKS.md разд. 2.1. Менять состав полей только по согласованию.
- *
- * TODO(D): добавить equals/hashCode (по id) и toString — это твоя часть (сдаётся на защите).
  */
 public class Subscriber {
 
@@ -88,5 +87,28 @@ public class Subscriber {
         this.registrationDate = registrationDate;
     }
 
-    // TODO(D): equals/hashCode по id + toString.
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Subscriber)) return false;
+        Subscriber that = (Subscriber) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Subscriber{" +
+                "id=" + id +
+                ", fullName='" + fullName + '\'' +
+                ", phone='" + phone + '\'' +
+                ", email='" + email + '\'' +
+                ", address='" + address + '\'' +
+                ", registrationDate=" + registrationDate +
+                '}';
+    }
 }
