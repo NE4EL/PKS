@@ -1,3 +1,6 @@
+# ER-диаграмма базы данных
+
+```mermaid
 erDiagram
     SUBSCRIBERS ||--o{ CONNECTION_REQUESTS : "оформляет"
 
@@ -20,3 +23,4 @@ erDiagram
         timestamp created_at
         timestamp updated_at
     }
+```
