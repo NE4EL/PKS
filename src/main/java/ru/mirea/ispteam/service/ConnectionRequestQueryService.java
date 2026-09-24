@@ -3,49 +3,82 @@ package ru.mirea.ispteam.service;
 import ru.mirea.ispteam.model.ConnectionRequest;
 import ru.mirea.ispteam.model.RequestStatus;
 import ru.mirea.ispteam.model.RequestType;
+import ru.mirea.ispteam.model.Subscriber;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /*
- * Владелец: D (поиск/фильтрация/сортировка). Скелет создан A.
- * Контракт — эталон из PKS.md разд. 4 (участник D). НЕ менять сигнатуры без согласования.
- *
- * TODO(D): реализовать через Stream API поверх ConnectionRequestService.getAll()
- * (не дублировать бизнес-логику B, не обращаться к репозиториям напрямую).
- *   - searchBySubscriber: по ФИО/телефону абонента (подстрока)
- *   - searchByDescription: по ключевому слову в description
- *   - filterByStatus / filterByType
- *   - sortByCreatedAt(asc) / sortByStatus
+ * Владелец: D (поиск/фильтрация/сортировка). Контракт — эталон из PKS.md разд. 4.
  */
 public class ConnectionRequestQueryService {
 
     private final ConnectionRequestService requestService;
+    private final SubscriberService subscriberService;
 
-    public ConnectionRequestQueryService(ConnectionRequestService requestService) {
+    public ConnectionRequestQueryService(ConnectionRequestService requestService,
+                                          SubscriberService subscriberService) {
         this.requestService = requestService;
+        this.subscriberService = subscriberService;
     }
 
     public List<ConnectionRequest> searchBySubscriber(String query) {
-        throw new UnsupportedOperationException("TODO(D): реализовать searchBySubscriber");
+        String needle = query == null ? "" : query.toLowerCase();
+
+        List<Long> matchingSubscriberIds = subscriberService.getAll().stream()
+                .filter(subscriber -> matchesSubscriber(subscriber, needle))
+                .map(Subscriber::getId)
+                .collect(Collectors.toList());
+
+        return requestService.getAll().stream()
+                .filter(request -> matchingSubscriberIds.contains(request.getSubscriberId()))
+                .collect(Collectors.toList());
     }
 
     public List<ConnectionRequest> searchByDescription(String keyword) {
-        throw new UnsupportedOperationException("TODO(D): реализовать searchByDescription");
+        String needle = keyword == null ? "" : keyword.toLowerCase();
+
+        return requestService.getAll().stream()
+                .filter(request -> request.getDescription() != null
+                        && request.getDescription().toLowerCase().contains(needle))
+                .collect(Collectors.toList());
     }
 
     public List<ConnectionRequest> filterByStatus(RequestStatus status) {
-        throw new UnsupportedOperationException("TODO(D): реализовать filterByStatus");
+        return requestService.getAll().stream()
+                .filter(request -> request.getStatus() == status)
+                .collect(Collectors.toList());
     }
 
     public List<ConnectionRequest> filterByType(RequestType type) {
-        throw new UnsupportedOperationException("TODO(D): реализовать filterByType");
+        return requestService.getAll().stream()
+                .filter(request -> request.getType() == type)
+                .collect(Collectors.toList());
     }
 
     public List<ConnectionRequest> sortByCreatedAt(boolean ascending) {
-        throw new UnsupportedOperationException("TODO(D): реализовать sortByCreatedAt");
+        Comparator<ConnectionRequest> comparator = Comparator.comparing(ConnectionRequest::getCreatedAt);
+        if (!ascending) {
+            comparator = comparator.reversed();
+        }
+
+        return requestService.getAll().stream()
+                .sorted(comparator)
+                .collect(Collectors.toList());
     }
 
     public List<ConnectionRequest> sortByStatus() {
-        throw new UnsupportedOperationException("TODO(D): реализовать sortByStatus");
+        return requestService.getAll().stream()
+                .sorted(Comparator.comparing(ConnectionRequest::getStatus))
+                .collect(Collectors.toList());
+    }
+
+    private boolean matchesSubscriber(Subscriber subscriber, String needle) {
+        boolean nameMatches = subscriber.getFullName() != null
+                && subscriber.getFullName().toLowerCase().contains(needle);
+        boolean phoneMatches = subscriber.getPhone() != null
+                && subscriber.getPhone().toLowerCase().contains(needle);
+        return nameMatches || phoneMatches;
     }
 }
