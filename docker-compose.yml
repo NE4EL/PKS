@@ -1,0 +1,36 @@
+# База данных КР1 (PostgreSQL) в Docker для JavaFX-приложения КР2.
+#
+# Запуск (из корня проекта, Docker Desktop должен быть запущен):
+#   copy .env.example .env          (Windows)   |   cp .env.example .env   (Linux/macOS)
+#   docker compose up -d --wait
+# Проверка:   docker compose ps     (статус healthy)
+# Остановка:  docker compose down   (данные сохраняются в volume isp-db-data;
+#             НЕ добавляйте -v, если данные нужно сохранить)
+#
+# При первом запуске на пустом volume контейнер сам выполнит schema.sql и seed-data.sql.
+# С компьютера база доступна на порту ISP_DB_PORT (по умолчанию 55433) — его и нужно
+# указать в src/main/resources/database.properties.
+
+services:
+  isp-db:
+    image: postgres:16-alpine
+    container_name: isp-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${ISP_DB_NAME:-isp}
+      POSTGRES_USER: ${ISP_DB_USER:-isp_app}
+      POSTGRES_PASSWORD: ${ISP_DB_PASSWORD:?Задайте ISP_DB_PASSWORD в файле .env (см. .env.example)}
+    ports:
+      - "${ISP_DB_PORT:-55433}:5432"
+    volumes:
+      - isp-db-data:/var/lib/postgresql/data
+      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./src/main/resources/seed-data.sql:/docker-entrypoint-initdb.d/02-seed-data.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  isp-db-data:

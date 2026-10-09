@@ -27,10 +27,16 @@ Thumbs.db
 *.tmp
 
 # Локальные настройки подключения к БД — у каждого участника свои.
-# В git коммитим только шаблон db.properties.example, реальный файл игнорируем,
+# В git коммитим только шаблон database.properties.example, реальный файл игнорируем,
 # чтобы ничей локальный логин/пароль/база не попадали в репозиторий и не конфликтовали.
+# db.properties — старое имя файла из КР1: больше не используется, но может остаться у кого-то локально
 src/main/resources/db.properties
+src/main/resources/database.properties
+
+# Пароль БД для docker-compose.yml — в git только шаблон .env.example
+.env
 
 # Экспортированные отчёты
 *.xlsx
+*.csv
 !docs/**/*.xlsx

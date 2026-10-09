@@ -1,5 +1,7 @@
 package ru.mirea.ispteam.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.mirea.ispteam.exception.DatabaseException;
 
 import java.io.BufferedReader;
@@ -19,9 +21,14 @@ import java.util.Properties;
  * Отвечает за подключение к PostgreSQL через JDBC и (опционально) инициализацию БД:
  * применение schema.sql при старте и seed-data.sql — только если БД пустая.
  *
- * Конфигурация читается из classpath: src/main/resources/db.properties.
+ * Конфигурация читается из classpath: src/main/resources/database.properties.
+ * Файл не коммитится (.gitignore) — пароль БД не хранится в исходном коде.
+ * Любой параметр можно переопределить системным свойством, например: -Ddb.password=...
  */
 public class DatabaseManager {
+
+    private static final Logger log = LoggerFactory.getLogger(DatabaseManager.class);
+    private static final String CONFIG_FILE = "database.properties";
 
     private final String url;
     private final String user;
@@ -29,11 +36,14 @@ public class DatabaseManager {
     private final boolean initOnStartup;
 
     public DatabaseManager() {
-        Properties props = loadProperties("db.properties");
-        this.url = props.getProperty("db.url");
-        this.user = props.getProperty("db.user");
-        this.password = props.getProperty("db.password");
-        this.initOnStartup = Boolean.parseBoolean(props.getProperty("db.initOnStartup", "false"));
+        Properties props = loadConfig();
+        this.url = setting(props, "db.url", null);
+        this.user = setting(props, "db.user", null);
+        this.password = setting(props, "db.password", null);
+        this.initOnStartup = Boolean.parseBoolean(setting(props, "db.initOnStartup", "false"));
+        if (url == null || url.isBlank()) {
+            throw new DatabaseException("В database.properties не задан параметр db.url");
+        }
     }
 
     /**
@@ -48,7 +58,19 @@ public class DatabaseManager {
     }
 
     /**
-     * Инициализация БД при старте приложения (если включена в db.properties):
+     * Проверка при старте приложения: открывает и сразу закрывает соединение.
+     * Так ошибка в настройках видна сразу, а не при первом действии пользователя.
+     */
+    public void checkConnection() {
+        try (Connection ignored = getConnection()) {
+            log.info("Подключение к БД установлено: {}", url);
+        } catch (SQLException e) {
+            throw new DatabaseException("Ошибка при проверке подключения к БД: " + url, e);
+        }
+    }
+
+    /**
+     * Инициализация БД при старте приложения (если включена в database.properties):
      *  - всегда применяет schema.sql (таблицы создаются через IF NOT EXISTS);
      *  - применяет seed-data.sql только если таблица subscribers пустая.
      */
@@ -59,7 +81,7 @@ public class DatabaseManager {
         runScript("schema.sql");
         if (isDatabaseEmpty()) {
             runScript("seed-data.sql");
-            System.out.println("[DatabaseManager] БД инициализирована тестовыми данными (seed-data.sql).");
+            log.info("БД инициализирована тестовыми данными (seed-data.sql)");
         }
     }
 
@@ -100,13 +122,22 @@ public class DatabaseManager {
         return sb.toString();
     }
 
-    private Properties loadProperties(String resourceName) {
-        try (InputStream in = getResource(resourceName)) {
+    private static String setting(Properties props, String key, String defaultValue) {
+        return System.getProperty(key, props.getProperty(key, defaultValue));
+    }
+
+    private Properties loadConfig() {
+        InputStream source = getClass().getClassLoader().getResourceAsStream(CONFIG_FILE);
+        if (source == null) {
+            throw new DatabaseException("Не найден файл настроек src/main/resources/database.properties. "
+                    + "Скопируйте database.properties.example в database.properties и укажите свои параметры БД.");
+        }
+        try (InputStream in = source) {
             Properties props = new Properties();
             props.load(new InputStreamReader(in, StandardCharsets.UTF_8));
             return props;
         } catch (IOException e) {
-            throw new DatabaseException("Не удалось прочитать " + resourceName, e);
+            throw new DatabaseException("Не удалось прочитать " + CONFIG_FILE, e);
         }
     }
 

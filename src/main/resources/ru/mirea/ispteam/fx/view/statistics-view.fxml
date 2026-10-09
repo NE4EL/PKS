@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Окно статистики: 11 показателей-плиток, выбор периода и две диаграммы. -->
+<ScrollPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="ru.mirea.ispteam.fx.controller.StatisticsController"
+            fitToWidth="true" styleClass="stats-scroll">
+    <VBox styleClass="stats" spacing="14">
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Label text="Статистика по заявкам" styleClass="form-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="⟳  Пересчитать" onAction="#refresh" styleClass="primary" minWidth="-Infinity"/>
+        </HBox>
+
+        <HBox styleClass="card" spacing="12" alignment="BOTTOM_LEFT">
+            <VBox spacing="3">
+                <Label text="Создана с" styleClass="field-label"/>
+                <DatePicker fx:id="fromDate" prefWidth="140" minWidth="140" promptText="дд.мм.гггг"/>
+            </VBox>
+            <VBox spacing="3">
+                <Label text="по" styleClass="field-label"/>
+                <DatePicker fx:id="toDate" prefWidth="140" minWidth="140" promptText="дд.мм.гггг"/>
+            </VBox>
+            <Button text="Весь период" onAction="#onResetPeriod" styleClass="flat" minWidth="-Infinity"/>
+            <VBox spacing="2" HBox.hgrow="ALWAYS">
+                <Label text="Период влияет на плитку «Заявок за период», остальные показатели считаются по всем данным"
+                       styleClass="muted" wrapText="true"/>
+                <Label fx:id="periodError" styleClass="error-text" visible="false"/>
+            </VBox>
+        </HBox>
+
+        <FlowPane hgap="12" vgap="12">
+            <VBox styleClass="kpi">
+                <Label fx:id="totalSubscribersValue" styleClass="kpi-value"/>
+                <Label text="Всего абонентов" styleClass="kpi-caption"/>
+            </VBox>
+            <VBox styleClass="kpi">
+                <Label fx:id="totalRequestsValue" styleClass="kpi-value"/>
+                <Label text="Всего заявок" styleClass="kpi-caption"/>
+            </VBox>
+            <VBox styleClass="kpi, kpi-active">
+                <Label fx:id="activeValue" styleClass="kpi-value"/>
+                <Label text="Активных (новые, в работе, одобренные)" styleClass="kpi-caption" wrapText="true"/>
+            </VBox>
+            <VBox styleClass="kpi, kpi-success">
+                <Label fx:id="completedValue" styleClass="kpi-value"/>
+                <Label text="Выполнено" styleClass="kpi-caption"/>
+            </VBox>
+            <VBox styleClass="kpi, kpi-danger">
+                <Label fx:id="cancelledValue" styleClass="kpi-value"/>
+                <Label text="Отклонено или отменено" styleClass="kpi-caption" wrapText="true"/>
+            </VBox>
+            <VBox styleClass="kpi">
+                <Label fx:id="completedPercentValue" styleClass="kpi-value"/>
+                <Label text="Доля выполненных заявок" styleClass="kpi-caption" wrapText="true"/>
+            </VBox>
+            <VBox styleClass="kpi">
+                <Label fx:id="avgPerSubscriberValue" styleClass="kpi-value"/>
+                <Label text="Заявок на одного абонента (в среднем)" styleClass="kpi-caption" wrapText="true"/>
+            </VBox>
+            <VBox styleClass="kpi">
+                <Label fx:id="avgTimeValue" styleClass="kpi-value"/>
+                <Label text="Среднее время выполнения заявки" styleClass="kpi-caption" wrapText="true"/>
+            </VBox>
+            <VBox styleClass="kpi">
+                <Label fx:id="minMaxTimeValue" styleClass="kpi-value, kpi-value-small"/>
+                <Label text="Мин. / макс. время выполнения" styleClass="kpi-caption" wrapText="true"/>
+            </VBox>
+            <VBox styleClass="kpi">
+                <Label fx:id="popularTariffValue" styleClass="kpi-value, kpi-value-small" wrapText="true"/>
+                <Label text="Самый популярный тариф" styleClass="kpi-caption" wrapText="true"/>
+            </VBox>
+            <VBox styleClass="kpi, kpi-period">
+                <Label fx:id="periodValue" styleClass="kpi-value"/>
+                <Label fx:id="periodCaption" styleClass="kpi-caption" wrapText="true"/>
+            </VBox>
+        </FlowPane>
+
+        <HBox spacing="12">
+            <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="4">
+                <Label text="Заявки по статусам" styleClass="card-title"/>
+                <PieChart fx:id="statusChart" legendVisible="false" labelsVisible="true" animated="false"
+                          prefHeight="320" minWidth="360"/>
+            </VBox>
+            <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="4">
+                <Label text="Заявки по типам" styleClass="card-title"/>
+                <BarChart fx:id="typeChart" legendVisible="false" animated="false" prefHeight="320" minWidth="380">
+                    <xAxis>
+                        <NumberAxis fx:id="countAxis" minorTickVisible="false" tickUnit="1" lowerBound="0"/>
+                    </xAxis>
+                    <yAxis>
+                        <CategoryAxis/>
+                    </yAxis>
+                </BarChart>
+            </VBox>
+        </HBox>
+    </VBox>
+</ScrollPane>
