@@ -82,7 +82,11 @@ powershell -ExecutionPolicy Bypass -File .\backend\start-compose.ps1     # из 
 cd javafx-client; .\run.ps1
 ```
 
-Демо-система публикует PostgreSQL на порту 55432, наша БД КР1 — на 55433, поэтому они не конфликтуют.
+На macOS/Linux вместо `.ps1`: `cd backend && docker compose up -d --wait`, затем `cd ../javafx-client && ./run.sh`.
+
+Демо-система публикует PostgreSQL на порту 5433 (`POSTGRES_PORT` в `backend/.env` архива; в PDF-методичке
+указан 55432, но в актуальной версии архива порт другой), наша БД КР1 — на 55433, поэтому они не конфликтуют.
+Подробная инструкция по запуску для Windows и macOS — [`Evtushenko.md`](Evtushenko.md).
 
 ## Что реализовано (обязательный минимум КР2)
 

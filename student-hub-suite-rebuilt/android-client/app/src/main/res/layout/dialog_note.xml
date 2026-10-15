@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <EditText
+        android:id="@+id/noteBody"
+        android:layout_width="match_parent"
+        android:layout_height="140dp"
+        android:gravity="top|start"
+        android:hint="Текст заметки"
+        android:inputType="textMultiLine|textCapSentences"
+        android:maxLength="4000" />
+
+    <CheckBox
+        android:id="@+id/notePinned"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Закрепить заметку" />
+
+    <TextView
+        android:id="@+id/noteError"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/danger"
+        android:visibility="gone" />
+</LinearLayout>

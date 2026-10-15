@@ -1,0 +1,27 @@
+# IDE and operating-system files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Java / Maven / Gradle build output
+**/target/
+**/build/
+**/.gradle/
+.gradle/
+
+# Android local SDK path and signing materials
+android-client/local.properties
+*.jks
+*.keystore
+
+# Local secrets and runtime data
+.env
+.env.*
+!.env.example
+*.log
+backups/
+
+# JavaFX optional local token vault (the reference client uses in-memory sessions)
+.student-hub/

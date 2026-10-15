@@ -1,0 +1,1 @@
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android"><background android:drawable="@color/primary"/><foreground android:drawable="@drawable/ic_student_hub"/></adaptive-icon>

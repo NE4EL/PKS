@@ -1,0 +1,16 @@
+@base = http://localhost:8080/api
+@access = REPLACE_AFTER_LOGIN
+
+### Login
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{"email":"admin@example.org","password":"REPLACE_ME"}
+
+### Analytics
+GET {{base}}/analytics
+Authorization: Bearer {{access}}
+
+### Smart filter
+GET {{base}}/students?query=группа:ЭФБО-07-24%20долг:да&page=0&size=25&sort=lastName,asc
+Authorization: Bearer {{access}}

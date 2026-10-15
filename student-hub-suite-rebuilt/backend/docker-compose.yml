@@ -1,0 +1,485 @@
+name: student-hub
+
+services:
+
+  # ============================================================
+  # PostgreSQL
+  # ============================================================
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required in .env}
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required in .env}
+
+    volumes:
+      # Храним PostgreSQL в named volume.
+      # При обычном docker compose down данные не удаляются.
+      - student_hub_postgres:/var/lib/postgresql/data
+
+    ports:
+      # База доступна только с локального компьютера.
+      # Из внешней сети порт не публикуется.
+      - "127.0.0.1:${POSTGRES_PORT:-5433}:5433"
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 5s
+
+    security_opt:
+      - no-new-privileges:true
+
+    networks:
+      - backend
+
+
+  # ============================================================
+  # Spring Boot REST API
+  # ============================================================
+  backend:
+    # Dockerfile для локальной разработки не нужен.
+    #
+    # Debian-based Maven + Temurin 21 используется вместо Alpine,
+    # чтобы избежать проблем с Jansi/native libraries.
+    image: maven:3.9.11-eclipse-temurin-21
+
+    restart: "no"
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    working_dir: /workspace
+
+    environment:
+
+      # --------------------------------------------------------
+      # Maven / JVM
+      # --------------------------------------------------------
+
+      SPRING_BOOT_VERSION: ${SPRING_BOOT_VERSION:-3.5.5}
+
+      MAVEN_OPTS: >-
+        -Dfile.encoding=UTF-8
+        -Djansi.force=false
+        -Djansi.tmpdir=/workspace/target/jansi-tmp
+        -Dstyle.color=never
+        -XX:MaxRAMPercentage=75
+
+      # --------------------------------------------------------
+      # Application
+      # --------------------------------------------------------
+
+      APP_PORT: ${APP_PORT:-8080}
+
+      # --------------------------------------------------------
+      # PostgreSQL
+      # --------------------------------------------------------
+
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+
+      # --------------------------------------------------------
+      # JWT
+      # --------------------------------------------------------
+
+      JWT_SECRET_BASE64: ${JWT_SECRET_BASE64:?JWT_SECRET_BASE64 is required in .env}
+      JWT_ISSUER: ${JWT_ISSUER:-student-hub}
+
+      ACCESS_TOKEN_MINUTES: ${ACCESS_TOKEN_MINUTES:-15}
+      REFRESH_TOKEN_DAYS: ${REFRESH_TOKEN_DAYS:-14}
+
+      # --------------------------------------------------------
+      # Bootstrap administrator
+      # --------------------------------------------------------
+
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:?BOOTSTRAP_ADMIN_EMAIL is required in .env}
+      BOOTSTRAP_ADMIN_NAME: ${BOOTSTRAP_ADMIN_NAME:-System Administrator}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:?BOOTSTRAP_ADMIN_PASSWORD is required in .env}
+
+      # --------------------------------------------------------
+      # Security / CORS
+      # --------------------------------------------------------
+
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:8080}
+
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+
+      PERMANENT_DELETE_ENABLED: ${PERMANENT_DELETE_ENABLED:-false}
+
+      # --------------------------------------------------------
+      # Spring Boot DevTools
+      # --------------------------------------------------------
+      #
+      # Сам DevTools включён всегда.
+      #
+      # При обычном docker compose up классы никто автоматически
+      # не перекомпилирует, поэтому приложение ведёт себя как
+      # обычный стабильный backend.
+      #
+      # В --profile dev появляется dev-watcher, который делает
+      # mvn compile после изменения исходников.
+      #
+      SPRING_DEVTOOLS_RESTART_ENABLED: "true"
+
+    volumes:
+
+      # Исходники подключены только для чтения.
+      # Контейнер backend не изменяет файлы проекта.
+      - ./pom.xml:/workspace/pom.xml:ro
+      - ./src:/workspace/src:ro
+
+      # target общий для backend и dev-watcher.
+      #
+      # Именно благодаря этому watcher компилирует новые .class,
+      # а DevTools внутри backend замечает их изменение.
+      - backend_target:/workspace/target
+
+      # Maven зависимости скачиваются один раз.
+      - maven_cache:/root/.m2
+
+    command:
+      - /bin/bash
+      - -euc
+      - |
+        mkdir -p /workspace/target/jansi-tmp
+        mkdir -p /workspace/target/tmp
+
+        export TMPDIR=/workspace/target/tmp
+
+        echo
+        echo "============================================================"
+        echo " STUDENT HUB"
+        echo "============================================================"
+        echo " Web UI:           http://localhost:$${APP_PORT}/"
+        echo " Swagger UI:       http://localhost:$${APP_PORT}/swagger-ui.html"
+        echo " REST API:         http://localhost:$${APP_PORT}/api"
+        echo " OpenAPI JSON:     http://localhost:$${APP_PORT}/v3/api-docs"
+        echo " Health:           http://localhost:$${APP_PORT}/actuator/health"
+        echo " JavaFX API:       http://localhost:$${APP_PORT}/api"
+        echo " Android emulator: http://10.0.2.2:$${APP_PORT}/api"
+        echo " PostgreSQL JDBC:  jdbc:postgresql://localhost:$${POSTGRES_PORT}/$${POSTGRES_DB}"
+        echo " PostgreSQL user:  $${POSTGRES_USER}"
+        echo " Admin login:      $${BOOTSTRAP_ADMIN_EMAIL}"
+        echo "============================================================"
+        echo
+        echo " Spring Boot is starting..."
+        echo
+
+        test -f /workspace/pom.xml || {
+          echo "ERROR: /workspace/pom.xml not found"
+          exit 78
+        }
+
+        test -d /workspace/src || {
+          echo "ERROR: /workspace/src not found"
+          exit 78
+        }
+
+        # Полное имя Maven-плагина используется вместо spring-boot:run,
+        # чтобы запуск не зависел от plugin-prefix resolution.
+        exec mvn \
+          -f /workspace/pom.xml \
+          -B \
+          -ntp \
+          -DskipTests \
+          org.springframework.boot:spring-boot-maven-plugin:$${SPRING_BOOT_VERSION}:run
+
+    ports:
+      - "127.0.0.1:${APP_PORT:-8080}:8080"
+
+    healthcheck:
+      # Maven image содержит bash.
+      #
+      # Проверяем непосредственно TCP-порт Tomcat,
+      # поэтому curl/wget устанавливать не требуется.
+      test:
+        [
+          "CMD-SHELL",
+          "bash -c 'echo > /dev/tcp/127.0.0.1/8080'"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 90s
+
+    tmpfs:
+      # noexec не задаётся, так как Maven/Jansi может загружать native library.
+      - /tmp:rw,nosuid,nodev,size=128m
+
+    cap_drop:
+      - ALL
+
+    security_opt:
+      - no-new-privileges:true
+
+    networks:
+      - backend
+
+
+  # ============================================================
+  # DEV WATCHER
+  # ============================================================
+  #
+  # Этот контейнер запускается ТОЛЬКО командой:
+  #
+  # docker compose --profile dev up
+  #
+  # При обычном:
+  #
+  # docker compose up
+  #
+  # его вообще не существует.
+  #
+  dev-watcher:
+
+    profiles:
+      - dev
+
+    image: maven:3.9.11-eclipse-temurin-21
+
+    restart: unless-stopped
+
+    depends_on:
+      backend:
+        condition: service_healthy
+
+    working_dir: /workspace
+
+    environment:
+
+      MAVEN_OPTS: >-
+        -Dfile.encoding=UTF-8
+        -Djansi.force=false
+        -Djansi.tmpdir=/workspace/target/jansi-tmp
+        -Dstyle.color=never
+        -XX:MaxRAMPercentage=75
+
+    volumes:
+
+      # Watcher исходники только читает.
+      - ./backend/pom.xml:/workspace/pom.xml:ro
+      - ./backend/src:/workspace/src:ro
+
+      # Но compiled classes записывает в общий target.
+      - backend_target:/workspace/target
+
+      - maven_cache:/root/.m2
+
+    command:
+      - /bin/bash
+      - -euc
+      - |
+        mkdir -p /workspace/target/jansi-tmp
+        mkdir -p /workspace/target/tmp
+
+        export TMPDIR=/workspace/target/tmp
+
+        echo
+        echo "============================================================"
+        echo " STUDENT HUB DEV WATCHER"
+        echo "============================================================"
+        echo " Hot reload is ENABLED"
+        echo
+        echo " Watching:"
+        echo "   /workspace/src"
+        echo
+        echo " Workflow:"
+        echo "   source changed"
+        echo "       -> mvn compile"
+        echo "       -> target/classes changed"
+        echo "       -> Spring Boot DevTools restart"
+        echo
+        echo " Stop with:"
+        echo "   Ctrl+C"
+        echo "============================================================"
+        echo
+
+        fingerprint() {
+          {
+            find /workspace/src \
+              -type f \
+              -print0 2>/dev/null
+
+            printf '%s\0' /workspace/pom.xml
+          } \
+          | sort -z \
+          | xargs -0 sha256sum 2>/dev/null \
+          | sha256sum \
+          | awk '{print $1}'
+        }
+
+        LAST="$$(fingerprint)"
+
+        while true
+        do
+          sleep 1
+
+          CURRENT="$$(fingerprint)"
+
+          if [ "$${CURRENT}" != "$${LAST}" ]
+          then
+            # Новое состояние сохраняется сразу. После следующего изменения
+            # исходников watcher снова попробует выполнить compile.
+            LAST="$${CURRENT}"
+
+            echo
+            echo "------------------------------------------------------------"
+            echo "[DEV] Source change detected"
+            echo "[DEV] Compiling..."
+            echo "------------------------------------------------------------"
+            echo
+
+            if mvn \
+              -f /workspace/pom.xml \
+              -B \
+              -ntp \
+              -DskipTests \
+              compile
+            then
+              echo
+              echo "------------------------------------------------------------"
+              echo "[DEV] BUILD SUCCESS"
+              echo "[DEV] Spring Boot DevTools should restart the application."
+              echo "------------------------------------------------------------"
+              echo
+            else
+              echo
+              echo "------------------------------------------------------------"
+              echo "[DEV] BUILD FAILURE"
+              echo "[DEV] Fix the source code and save again."
+              echo "------------------------------------------------------------"
+              echo
+            fi
+          fi
+        done
+
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,size=128m
+
+    cap_drop:
+      - ALL
+
+    security_opt:
+      - no-new-privileges:true
+
+    networks:
+      - backend
+
+
+  # ============================================================
+  # CONNECTION INFO
+  # ============================================================
+  #
+  # Этот контейнер ничего не обслуживает.
+  #
+  # Он ждёт успешного healthcheck Spring Boot,
+  # печатает все полезные адреса и завершается.
+  #
+  connection-info:
+
+    image: alpine:3.22
+
+    restart: "no"
+
+    depends_on:
+      backend:
+        condition: service_healthy
+
+    environment:
+
+      APP_PORT: ${APP_PORT:-8080}
+
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL}
+
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        printf '\n'
+        printf '============================================================\n'
+        printf ' STUDENT HUB IS READY\n'
+        printf '============================================================\n'
+
+        printf ' Web UI:           http://localhost:%s/\n' \
+          "$$APP_PORT"
+
+        printf ' Swagger UI:       http://localhost:%s/swagger-ui.html\n' \
+          "$$APP_PORT"
+
+        printf ' REST API:         http://localhost:%s/api\n' \
+          "$$APP_PORT"
+
+        printf ' OpenAPI JSON:     http://localhost:%s/v3/api-docs\n' \
+          "$$APP_PORT"
+
+        printf ' Health:           http://localhost:%s/actuator/health\n' \
+          "$$APP_PORT"
+
+        printf ' JavaFX API:       http://localhost:%s/api\n' \
+          "$$APP_PORT"
+
+        printf ' Android emulator: http://10.0.2.2:%s/api\n' \
+          "$$APP_PORT"
+
+        printf ' PostgreSQL JDBC:  jdbc:postgresql://localhost:%s/%s\n' \
+          "$$POSTGRES_PORT" \
+          "$$POSTGRES_DB"
+
+        printf ' PostgreSQL user:  %s\n' \
+          "$$POSTGRES_USER"
+
+        printf ' Admin login:      %s\n' \
+          "$$BOOTSTRAP_ADMIN_EMAIL"
+
+        printf '============================================================\n'
+        printf ' Passwords and JWT secrets are not printed.\n'
+        printf '============================================================\n'
+        printf '\n'
+
+    networks:
+      - backend
+
+
+# ==============================================================
+# Named volumes
+# ==============================================================
+
+volumes:
+
+  # Данные PostgreSQL.
+  student_hub_postgres:
+
+  # Общий target backend + dev-watcher.
+  backend_target:
+
+  # Локальный Maven repository.
+  maven_cache:
+
+
+# ==============================================================
+# Networks
+# ==============================================================
+
+networks:
+
+  backend:
+    driver: bridge

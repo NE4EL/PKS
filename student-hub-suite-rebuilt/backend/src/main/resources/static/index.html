@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Student Hub — безопасная система работы со студентами">
+    <title>Student Hub</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/styles.css?v=admin-swagger-v7">
+</head>
+<body>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<section id="login-view" class="login-shell">
+    <form id="login-form" class="card login-card" autocomplete="on">
+        <div class="brand-mark">SH</div>
+        <h1>Student Hub</h1>
+        <p class="muted">Система управления данными студентов</p>
+        <label>Email
+            <input id="login-email" type="email" autocomplete="username" required maxlength="254">
+        </label>
+        <label>Пароль
+            <input id="login-password" type="password" autocomplete="current-password" required maxlength="128">
+        </label>
+        <button class="primary" type="submit">Войти</button>
+        <p id="login-error" class="error" hidden></p>
+    </form>
+</section>
+
+<div id="app-view" class="app-shell" hidden>
+    <aside class="sidebar">
+        <div class="brand"><span class="brand-mark small">SH</span><strong>Student Hub</strong></div>
+        <nav id="navigation">
+            <button data-tab="dashboard" class="nav-item active">Аналитика</button>
+            <button data-tab="students" class="nav-item">Студенты</button>
+            <button data-tab="groups" class="nav-item">Группы</button>
+            <button data-tab="users" class="nav-item admin-only">Пользователи</button>
+            <button data-tab="audit" class="nav-item admin-only">Аудит</button>
+
+            <!--
+                Swagger доступен только администратору.
+                Серверная роль при этом остаётся ADMIN; это лишь UI-ссылка,
+                а не замена серверной авторизации REST-методов.
+            -->
+            <a href="/swagger-ui.html"
+               class="nav-item nav-link admin-only"
+               target="_blank"
+               rel="noopener noreferrer"
+               title="Открыть Swagger UI в новой вкладке">
+                Swagger API ↗
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div id="current-user" class="current-user"></div>
+            <button id="change-password" class="secondary full">Сменить пароль</button>
+            <button id="logout" class="danger-outline full">Выйти</button>
+        </div>
+    </aside>
+
+    <main class="content">
+        <header class="topbar">
+            <div>
+                <h2 id="page-title">Аналитика</h2>
+                <p id="page-subtitle" class="muted">Основные показатели по студентам</p>
+            </div>
+            <span id="connection-state" class="badge success">API подключён</span>
+        </header>
+
+        <section id="tab-dashboard" class="tab active">
+            <div id="metric-grid" class="metric-grid"></div>
+            <div class="grid-3">
+                <article class="card"><h3>По группам</h3><div id="chart-groups" class="bar-list"></div></article>
+                <article class="card"><h3>По статусам</h3><div id="chart-status" class="bar-list"></div></article>
+                <article class="card"><h3>По риску</h3><div id="chart-risk" class="bar-list"></div></article>
+            </div>
+        </section>
+
+        <section id="tab-students" class="tab">
+            <div class="toolbar card">
+                <div class="search-wrap">
+                    <input id="student-search" type="search" maxlength="500"
+                           placeholder="Иванов группа:ЭФБО-07-24 балл<3.5 долг:да риск:высокий">
+                    <button id="search-students" class="primary">Найти</button>
+                </div>
+                <div class="toolbar-actions teacher-only">
+                    <button id="add-student" class="primary">+ Студент</button>
+                    <button id="bulk-action" class="secondary">Массовая операция</button>
+                    <button id="import-csv" class="secondary">Импорт CSV</button>
+                    <button id="export-csv" class="secondary">Экспорт CSV</button>
+                </div>
+                <details class="filter-help">
+                    <summary>Подсказка по умному фильтру</summary>
+                    <code>группа:ЭФБО-07-24 статус:обучается долг:да балл&lt;3.5 риск:высокий тег:староста архив:все</code>
+                </details>
+            </div>
+            <div class="card table-card">
+                <div class="table-scroll">
+                    <table>
+                        <thead><tr>
+                            <th class="teacher-only"><input id="select-all-students" type="checkbox" aria-label="Выбрать всех"></th>
+                            <th>ФИО</th><th>Группа</th><th>Статус</th><th>Балл</th><th>Долг</th><th>Риск</th><th>Теги</th><th>Действия</th>
+                        </tr></thead>
+                        <tbody id="students-body"></tbody>
+                    </table>
+                </div>
+                <div class="pager">
+                    <button id="students-prev" class="secondary">←</button>
+                    <span id="students-page"></span>
+                    <button id="students-next" class="secondary">→</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-groups" class="tab">
+            <div class="toolbar card">
+                <p>Группы используются всеми клиентами и проверяются сервером.</p>
+                <button id="add-group" class="primary admin-only">+ Группа</button>
+            </div>
+            <div class="card table-card"><div class="table-scroll"><table>
+                <thead><tr><th>Код</th><th>Название</th><th>Год поступления</th><th>Активна</th><th class="admin-only">Действия</th></tr></thead>
+                <tbody id="groups-body"></tbody>
+            </table></div></div>
+        </section>
+
+        <section id="tab-users" class="tab admin-only">
+            <div class="toolbar card"><button id="add-user" class="primary">+ Пользователь</button></div>
+            <div class="card table-card"><div class="table-scroll"><table>
+                <thead><tr><th>Email</th><th>Имя</th><th>Роли</th><th>Активен</th><th>Временный пароль</th><th>Действия</th></tr></thead>
+                <tbody id="users-body"></tbody>
+            </table></div></div>
+        </section>
+
+        <section id="tab-audit" class="tab admin-only">
+            <div class="toolbar card search-wrap">
+                <input id="audit-search" type="search" maxlength="200" placeholder="Пользователь, событие, correlation ID">
+                <button id="search-audit" class="primary">Найти</button>
+            </div>
+            <div class="card table-card"><div class="table-scroll"><table>
+                <thead><tr><th>Дата</th><th>Пользователь</th><th>Событие</th><th>Сущность</th><th>Описание</th><th>Correlation ID</th></tr></thead>
+                <tbody id="audit-body"></tbody>
+            </table></div></div>
+        </section>
+    </main>
+</div>
+
+<dialog id="entity-dialog"><form id="entity-form" method="dialog" class="dialog-form"></form></dialog>
+<dialog id="notes-dialog"><div class="dialog-form wide"><div class="dialog-head"><h3>Заметки</h3><button data-close-dialog="notes-dialog" class="icon-button">×</button></div><div id="notes-list"></div><form id="note-form"><textarea id="note-body" maxlength="4000" required placeholder="Текст заметки"></textarea><label class="inline"><input id="note-pinned" type="checkbox"> Закрепить</label><button class="primary">Добавить заметку</button></form></div></dialog>
+<dialog id="csv-dialog"><div class="dialog-form wide"><div class="dialog-head"><h3>Импорт CSV</h3><button data-close-dialog="csv-dialog" class="icon-button">×</button></div><input id="csv-file" type="file" accept=".csv,text/csv"><label>Режим<select id="csv-mode"><option value="CREATE_ONLY">Только новые</option><option value="UPSERT_BY_EXTERNAL_ID">Обновить по externalId</option></select></label><div class="button-row"><button id="csv-preview" class="secondary">Проверить</button><button id="csv-apply" class="primary" disabled>Применить</button></div><pre id="csv-result" class="result-box"></pre></div></dialog>
+<script src="/app.js?v=roles-phone-risk-v6" defer></script>
+</body>
+</html>

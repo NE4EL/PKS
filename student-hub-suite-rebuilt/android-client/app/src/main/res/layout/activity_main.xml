@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:background="@color/background">
+    <com.google.android.material.appbar.MaterialToolbar android:id="@+id/toolbar" android:layout_width="match_parent" android:layout_height="?attr/actionBarSize" android:background="@color/primary" app:title="Student Hub" app:titleTextColor="@android:color/white" />
+    <ScrollView android:layout_width="match_parent" android:layout_height="match_parent">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
+            <TextView android:id="@+id/userInfo" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="16sp" android:paddingBottom="16dp" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/dashboardButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/analytics" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/studentsButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/students" android:layout_marginTop="10dp" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/groupsButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/groups" android:layout_marginTop="10dp" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/usersButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/users" android:layout_marginTop="10dp" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/auditButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/audit" android:layout_marginTop="10dp" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/changePasswordButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Сменить пароль" android:layout_marginTop="22dp" style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/logoutButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/logout" android:layout_marginTop="10dp" style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/primary"
+        app:title="Карточка студента"
+        app:titleTextColor="@android:color/white"
+        app:navigationIcon="@drawable/ic_arrow_back" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <EditText android:id="@+id/lastName" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Фамилия *" android:maxLength="100" />
+            <EditText android:id="@+id/firstName" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Имя *" android:maxLength="100" />
+            <EditText android:id="@+id/middleName" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Отчество" android:maxLength="100" />
+            <EditText android:id="@+id/externalId" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="External ID" android:maxLength="100" />
+            <EditText android:id="@+id/email" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Email" android:inputType="textEmailAddress" android:maxLength="254" />
+            <EditText android:id="@+id/phone" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="+7-999-999-99-99" android:inputType="phone" android:maxLength="16" />
+            <EditText android:id="@+id/birthDate" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Дата рождения YYYY-MM-DD" android:inputType="date" />
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Группа" android:layout_marginTop="10dp" />
+            <Spinner android:id="@+id/group" android:layout_width="match_parent" android:layout_height="wrap_content" />
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Статус" android:layout_marginTop="10dp" />
+            <Spinner android:id="@+id/status" android:layout_width="match_parent" android:layout_height="wrap_content" />
+
+            <EditText
+                android:id="@+id/averageGrade"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Средний балл 0–100"
+                android:inputType="numberDecimal" />
+
+            <CheckBox android:id="@+id/hasDebt" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Есть академическая задолженность" />
+            <EditText android:id="@+id/tags" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Теги через запятую" android:maxLength="1000" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/save"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Сохранить"
+                android:layout_marginTop="18dp" />
+
+            <ProgressBar
+                android:id="@+id/progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

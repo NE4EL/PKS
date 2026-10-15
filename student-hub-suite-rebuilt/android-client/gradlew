@@ -1,0 +1,44 @@
+#!/bin/sh
+set -eu
+
+GRADLE_VERSION="8.13"
+EXPECTED_SHA256="20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78"
+DIST_URL="https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip"
+CACHE_ROOT="${HOME}/.studenthub/gradle"
+ZIP_PATH="${CACHE_ROOT}/gradle-${GRADLE_VERSION}-bin.zip"
+GRADLE_HOME="${CACHE_ROOT}/gradle-${GRADLE_VERSION}"
+GRADLE_BIN="${GRADLE_HOME}/bin/gradle"
+
+mkdir -p "$CACHE_ROOT"
+
+hash_ok() {
+  [ -f "$ZIP_PATH" ] || return 1
+  command -v sha256sum >/dev/null 2>&1 || {
+    echo "sha256sum is required" >&2
+    return 1
+  }
+  ACTUAL=$(sha256sum "$ZIP_PATH" | awk '{print $1}')
+  [ "$ACTUAL" = "$EXPECTED_SHA256" ]
+}
+
+if [ ! -x "$GRADLE_BIN" ]; then
+  if ! hash_ok; then
+    rm -f "$ZIP_PATH"
+    echo "[Student Hub] Downloading Gradle ${GRADLE_VERSION}..."
+    if command -v curl >/dev/null 2>&1; then
+      curl -fL "$DIST_URL" -o "$ZIP_PATH"
+    elif command -v wget >/dev/null 2>&1; then
+      wget -O "$ZIP_PATH" "$DIST_URL"
+    else
+      echo "curl or wget is required" >&2
+      exit 1
+    fi
+    hash_ok || { echo "Gradle SHA-256 mismatch. Download rejected." >&2; exit 1; }
+  fi
+
+  command -v unzip >/dev/null 2>&1 || { echo "unzip is required" >&2; exit 1; }
+  rm -rf "$GRADLE_HOME"
+  unzip -q "$ZIP_PATH" -d "$CACHE_ROOT"
+fi
+
+exec "$GRADLE_BIN" "$@"

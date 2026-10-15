@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <EditText android:id="@+id/userEmail" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Email *" android:inputType="textEmailAddress" android:maxLength="254" />
+        <EditText android:id="@+id/userDisplayName" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Отображаемое имя *" android:maxLength="160" />
+        <TextView android:id="@+id/userTemporaryPasswordLabel" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Временный пароль" android:layout_marginTop="8dp" />
+        <EditText android:id="@+id/userTemporaryPassword" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Временный пароль *" android:inputType="textPassword" android:maxLength="128" />
+        <CheckBox android:id="@+id/userEnabled" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Учётная запись активна" />
+
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Роли" android:textStyle="bold" android:layout_marginTop="10dp" />
+        <CheckBox android:id="@+id/roleViewer" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Наблюдатель" />
+        <CheckBox android:id="@+id/roleTeacher" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Преподаватель" />
+        <CheckBox android:id="@+id/roleAdmin" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Администратор" />
+
+        <TextView android:id="@+id/userError" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/danger" android:visibility="gone" />
+    </LinearLayout>
+</ScrollView>

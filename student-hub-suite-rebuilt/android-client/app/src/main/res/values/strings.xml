@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Student Hub</string>
+    <string name="login">Войти</string>
+    <string name="email">Email</string>
+    <string name="password">Пароль</string>
+    <string name="students">Студенты</string>
+    <string name="analytics">Аналитика</string>
+    <string name="groups">Группы</string>
+    <string name="users">Пользователи</string>
+    <string name="audit">Аудит</string>
+    <string name="logout">Выйти</string>
+</resources>

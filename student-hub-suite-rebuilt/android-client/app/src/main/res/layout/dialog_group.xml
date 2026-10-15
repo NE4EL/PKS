@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <EditText android:id="@+id/groupCode" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Код группы *" android:maxLength="50" />
+    <EditText android:id="@+id/groupName" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Название" android:maxLength="200" />
+    <EditText android:id="@+id/groupYear" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Год поступления" android:inputType="number" android:maxLength="4" />
+    <CheckBox android:id="@+id/groupActive" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Активная группа" />
+    <TextView android:id="@+id/groupError" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/danger" android:visibility="gone" />
+</LinearLayout>
