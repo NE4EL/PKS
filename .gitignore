@@ -34,3 +34,9 @@ src/main/resources/db.properties
 # Экспортированные отчёты
 *.xlsx
 !docs/**/*.xlsx
+
+.env
+**/target/
+**/database.properties
+**/db.properties
+.DS_Store

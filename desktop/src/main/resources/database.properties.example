@@ -1,0 +1,24 @@
+# ШАБЛОН настроек подключения JavaFX-приложения (КР2) к PostgreSQL из КР1.
+# ─────────────────────────────────────────────────────────────
+# Скопируйте этот файл в database.properties (в той же папке) и впишите
+# СВОИ значения. Реальный database.properties в git не коммитится (.gitignore),
+# поэтому пароль БД не попадает ни в репозиторий, ни в исходный код.
+#
+#   Windows:      copy src\main\resources\database.properties.example src\main\resources\database.properties
+#   Linux/macOS:  cp src/main/resources/database.properties.example src/main/resources/database.properties
+# ─────────────────────────────────────────────────────────────
+
+# Вариант 1 (рекомендуется). БД КР1 в Docker: "docker compose up -d" из корня проекта (см. README).
+# Порт 55433 и пользователь/пароль — те же, что в файле .env в корне проекта.
+db.url=jdbc:postgresql://localhost:55433/isp
+db.user=isp_app
+db.password=пароль_из_файла_.env
+
+# Вариант 2. Локально установленный PostgreSQL (обычно порт 5432):
+#db.url=jdbc:postgresql://localhost:5432/isp
+#db.user=postgres
+#db.password=ваш_пароль
+
+# Автоматически применять schema.sql и seed-data.sql при запуске (true/false).
+# seed-data.sql применяется только если таблица subscribers пустая.
+db.initOnStartup=true

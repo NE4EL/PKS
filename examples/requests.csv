@@ -1,0 +1,3 @@
+externalId,description,title,address,email,phone,dueDate,subscriber,status,type,tariffPlan,estimatedHours,urgent,tags
+REQ-IMPORT-001,Подключить оптоволокно и настроить роутер,Новое подключение,"Москва, ул. Связи, 1",ivanov@example.org,+7-999-123-45-67,2026-12-01,ACC-DEMO,NEW,NEW_CONNECTION,Домашний 500,4,false,подключение|оптика
+REQ-IMPORT-002,Проверить потери пакетов,Диагностика линии,"Москва, ул. Связи, 1",ivanov@example.org,+7-999-123-45-67,,ACC-DEMO,IN_PROGRESS,TECHNICAL_SUPPORT,Домашний 500,8,true,диагностика
